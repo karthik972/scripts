@@ -1,0 +1,16 @@
+sender_id,receiver_id,payer_name,payer_id,provider_name,provider_id,subscriber_last,subscriber_first,subscriber_id,trace_number,claim_number,service_date
+ABC123456,XYZ789012,HealthPlan,123456,Dr. John Doe,789012,Smith,John,ABC123,TR123456,CLM987654,20240101
+MNO567890,PQR234567,UnitedHealth,987654,Dr. Jane Roe,654321,Doe,Jane,XYZ789,TR987654,CLM123456,20240215
+DEF345678,GHI901234,BlueShield,567890,Dr. Alice Brown,321789,Johnson,Robert,LMN456,TR456789,CLM567890,20240310
+
+
+payer_name -- 0
+payer_id -- 1
+provider_name -- 0
+provider_id -- ?? (provider_id_type_xx)
+subscriber_last -- 1 (patient_lnm)
+subscriber_first -- 1 (patient_fnm)
+subscriber_id -- 0
+trace_number --? (in_trace_id_1) (also known as claim reference number)
+claim_number -- 0
+service_date -- ?? (service_from or service_to?)
