@@ -10,9 +10,15 @@ def parse_277_file(file_path):
         lines = file.readlines()
 
     current_claim = {}
+
+    claim_status_code_dict = {
+        "E0:33": "Claim_Rejected",
+        "E0:21:1P": "Claim accepted",
+        "E0:0": "This is zero"
+    }
     
     for line in lines:
-        segments = line.strip().split("*")
+        segments = line.strip().rstrip("~").split("*")
         segment_id = segments[0]
 
         if segment_id == "NM1":
@@ -29,28 +35,31 @@ def parse_277_file(file_path):
                 current_claim["patient_last_name"] = segments[3] if len(segments) > 3 else ""
                 current_claim["patient_first_name"] = segments[4] if len(segments) > 4 else ""
                 current_claim["member_id"] = segments[9] if len(segments) > 9 else ""
-
         elif segment_id == "TRN":
             current_claim["claim_id"] = segments[2]
 
         elif segment_id == "STC":
             current_claim["status_code"] = segments[1]
+            current_claim["status_description"] = claim_status_code_dict[segments[1]]
             current_claim["status_date"] = segments[2] if len(segments) > 2 else ""
-            current_claim["claim_amount"] = segments[3] if len(segments) > 3 else ""
-            current_claim["paid_amount"] = segments[4] if len(segments) > 4 else ""
-
+            current_claim["claim_amount"] = segments[4] if len(segments) > 4 else ""
+            current_claim["paid_amount"] = segments[5] if len(segments) > 5 else ""
         elif segment_id == "REF" and segments[1] == "EJ":
             current_claim["reference_number"] = segments[2]
 
         elif segment_id == "DTP" and segments[1] == "472":
-            current_claim["service_from_date"] = segments[3] if len(segments) > 3 else ""
-            current_claim["service_to_date"] = segments[4] if len(segments) > 4 else ""
+            if segments[2] == "RD8":
+                current_claim["service_from_date"] = segments[3].split("-")[0] if len(segments) > 3 else ""
+                current_claim["service_to_date"] = segments[3].split("-")[1] if len(segments) > 3 else ""
+            elif segments[2] == "D8":
+                current_claim["service_from_date"] = segments[3] if len(segments) > 3 else ""
+                current_claim["service_to_date"] = segments[3] if len(segments) > 3 else ""
 
         elif segment_id == "PER":
             current_claim["payer_contact"] = segments[4] if len(segments) > 4 else ""
 
         # When all required data is collected, save it and start a new claim
-        if "status_code" in current_claim:
+        if segment_id == "SE":
             claims.append(current_claim)
             current_claim = {}
 
@@ -66,7 +75,7 @@ def write_csv(claims, output_folder):
     fieldnames = [
         "claim_id", "payer_name", "payer_contact", "submitter_name", "submitter_id",
         "provider_name", "provider_npi", "patient_last_name", "patient_first_name",
-        "member_id", "reference_number", "service_from_date", "service_to_date", "status_code", "status_date",
+        "member_id", "reference_number", "service_from_date", "service_to_date", "status_code", "status_description", "status_date",
         "claim_amount", "paid_amount"
     ]
 
